@@ -6,6 +6,8 @@ function parseArtistIds (response){
         list.push({
             name: artists[i].name,
             id: artists[i].id,
+            popularity: artists[i].popularity,
+            image: artists[i].images[0]
         });
     }
     return list;

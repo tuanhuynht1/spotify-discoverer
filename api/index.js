@@ -34,8 +34,10 @@ router.get('/token', (req,res) => {
 // search artist by artist query body -> artist: kid cudi, header -> Authorization: Bearer asvd...adsa 
 router.get('/artist', (req,res) =>{
     const { artist, useParser } = req.body;
-    const token = req.header('Token');
+    if(!artist){res.status(400).send({error:'require artist to search'})}
+
     // configure spotify request
+    const token = req.header('Token');
     const options = {
         'method': 'GET',
         'url': `https://api.spotify.com/v1/search?q=${artist}&type=artist`,
