@@ -22,12 +22,16 @@ function parseTopTracks (response){
     // console.log(artists);
     let list = [];
     for (let i = 0; i < tracks.length; i++){
+
+        // choose most recent image if available
+        const image = tracks[i].album.images.length ? tracks[i].album.images[0] : null;
+
         list.push({
             name: tracks[i].name,
             id: tracks[i].id,
             album: tracks[i].album.name,
             preview_url: tracks[i].preview_url,
-            images: tracks[i].album.images
+            images: image
         });
     }
     return list;
