@@ -33,7 +33,7 @@ router.get('/token', (req,res) => {
 
 // search artist by artist query body -> artist: kid cudi, header -> Authorization: Bearer asvd...adsa 
 router.get('/artist', (req,res) =>{
-    const { artist } = req.body;
+    const { artist, useParser } = req.body;
     const token = req.header('Token');
     // configure spotify request
     const options = {
@@ -46,8 +46,14 @@ router.get('/artist', (req,res) =>{
     // request all artist info that matches the query
     request(options, function (error, response) { 
         if (!error && response.statusCode === 200) {
-            // [ {name,id} ]
-            res.send(parseArtistIds(JSON.parse(response.body)));
+            if (useParser){
+                // if useParser = true, return [ { name: ..., id: ... } ]
+                res.send(parseArtistIds(JSON.parse(response.body)));
+            }
+            else{
+                // send the whole body
+                res.send(JSON.parse(response.body));
+            }
         }
     });
 })
