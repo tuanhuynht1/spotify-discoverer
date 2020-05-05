@@ -11,7 +11,7 @@ const router = require('express').Router();     // router for /api endpoints
 // request server to server acess token from spotify, returns json body with access_token object inside 
 router.get('/token', (req,res) => {
     // configure request to spotify
-    const authOptions  = {
+    const options  = {
         'method': 'POST',
         'url': 'https://accounts.spotify.com/api/token',
         'headers': {
@@ -22,7 +22,7 @@ router.get('/token', (req,res) => {
         }
     };
     // make request to spotify
-    request(authOptions , (error,response) => { 
+    request(options , (error,response) => { 
         if (!error && response.statusCode === 200) {
             res.send(JSON.parse(response.body));
         }
@@ -30,7 +30,7 @@ router.get('/token', (req,res) => {
 })
 
 // search artist by artist query body -> artist: kid cudi, header -> Authorization: Bearer asvd...adsa 
-router.get('/search', (req,res) =>{
+router.get('/artist', (req,res) =>{
     const { artist } = req.body;
     const token = req.header('Token');
     // configure spotify request
@@ -50,7 +50,7 @@ router.get('/search', (req,res) =>{
 })
 
 // search tracks by artist, header -> Authorization: Bearer asvd...adsa 
-router.get('/artist/:id', (req,res) =>{
+router.get('/artist-top-tracks/:id', (req,res) =>{
     const { id } = req.params;
     const token = req.header('Token');
     // configure spotify request
@@ -61,7 +61,36 @@ router.get('/artist/:id', (req,res) =>{
           'Authorization': 'Bearer ' + token 
         }
     };
-    // request all artist info that matches the query
+    // request all tracks for the artist's id
+    request(options, function (error, response) { 
+        if (!error && response.statusCode === 200) {
+            res.send(JSON.parse(response.body));
+        }
+    });
+})
+
+// search track info for all specified, header -> Authorization: Bearer asvd...adsa, body -> ids: [...id] 
+router.get('/tracks', (req,res) =>{
+    const { ids } = req.body;
+    const token = req.header('Token');
+
+    // append ids delimited by '%2C'
+    let urlEncodedIds = '';
+    for (let i = 0; i < ids.length; i++){
+        urlEncodedIds += ids[i];
+        // concat %2C to all ids except the last one
+        if (i !== ids.length - 1) {urlEncodedIds += '%2C'}
+    }
+
+    // configure spotify request
+    var options = {
+        'method': 'GET',
+        'url': `https://api.spotify.com/v1/tracks?ids=${urlEncodedIds}&market=US`,
+        'headers': {
+          'Authorization': 'Bearer ' + token 
+        }
+    };
+    // request all tracks for the artist's id
     request(options, function (error, response) { 
         if (!error && response.statusCode === 200) {
             res.send(JSON.parse(response.body));
