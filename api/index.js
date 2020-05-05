@@ -30,7 +30,7 @@ router.get('/token', (req,res) => {
 })
 
 // search artist by artist query body -> artist: kid cudi, header -> Authorization: Bearer asvd...adsa 
-router.get('/search/artists', (req,res) =>{
+router.get('/search', (req,res) =>{
     const { artist } = req.body;
     const token = req.header('Token');
     // configure spotify request
@@ -39,6 +39,26 @@ router.get('/search/artists', (req,res) =>{
         'url': `https://api.spotify.com/v1/search?q=${artist}&type=artist`,
         'headers': {
           'Authorization': 'Bearer ' + token
+        }
+    };
+    // request all artist info that matches the query
+    request(options, function (error, response) { 
+        if (!error && response.statusCode === 200) {
+            res.send(JSON.parse(response.body));
+        }
+    });
+})
+
+// search tracks by artist, header -> Authorization: Bearer asvd...adsa 
+router.get('/artist/:id', (req,res) =>{
+    const { id } = req.params;
+    const token = req.header('Token');
+    // configure spotify request
+    var options = {
+        'method': 'GET',
+        'url': `https://api.spotify.com/v1/artists/${id}/top-tracks?country=US`,
+        'headers': {
+          'Authorization': 'Bearer ' + token 
         }
     };
     // request all artist info that matches the query
