@@ -1,4 +1,4 @@
-const {parseArtistIds} = require('../helpers/SpotifyParser');
+const { parseArtists, parseTopTracks } = require('../helpers/SpotifyParser');
 
 // configure client credentials to request access token from spotify
 const dotenv = require('dotenv');
@@ -26,7 +26,11 @@ router.get('/token', (req,res) => {
     // make request to spotify
     request(options , (error,response) => { 
         if (!error && response.statusCode === 200) {
+            // send object -> {access_token, type, scope, expire_in}
             res.send(JSON.parse(response.body));
+        }
+        else{
+            res.status(response.statusCode).send({error: response.statusMessage});
         }
     });
 })
@@ -45,17 +49,20 @@ router.get('/artist', (req,res) =>{
           'Authorization': 'Bearer ' + token
         }
     };
-    // request all artist info that matches the query
+    // request all artist info that matches the artist query
     request(options, function (error, response) { 
         if (!error && response.statusCode === 200) {
             if (useParser){
-                // if useParser = true, return [ { name: ..., id: ... } ]
-                res.send(parseArtistIds(JSON.parse(response.body)));
+                // if useParser = true, return [ ... { name,id,popularity,image}]
+                res.send(parseArtists(JSON.parse(response.body)));
             }
             else{
                 // send the whole body
                 res.send(JSON.parse(response.body));
             }
+        }
+        else{
+            res.status(response.statusCode).send({error: response.statusMessage});
         }
     });
 })
@@ -63,6 +70,7 @@ router.get('/artist', (req,res) =>{
 // search tracks by artist, header -> Authorization: Bearer asvd...adsa 
 router.get('/artist-top-tracks/:id', (req,res) =>{
     const { id } = req.params;
+    const { useParser } = req.body;
     const token = req.header('Token');
     // configure spotify request
     var options = {
@@ -75,7 +83,17 @@ router.get('/artist-top-tracks/:id', (req,res) =>{
     // request all tracks for the artist's id
     request(options, function (error, response) { 
         if (!error && response.statusCode === 200) {
-            res.send(JSON.parse(response.body));
+            if (useParser){
+                // if useParser = true, return [ ... { name,id,popularity,image}]
+                res.send(parseTopTracks(JSON.parse(response.body)));
+            }
+            else{
+                // send the whole body
+                res.send(JSON.parse(response.body));
+            }
+        }
+        else{
+            res.status(response.statusCode).send({error: response.statusMessage});
         }
     });
 })
