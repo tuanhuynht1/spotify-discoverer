@@ -1,3 +1,5 @@
+const {parseArtistIds} = require('../helpers/SpotifyParser');
+
 // configure client credentials to request access token from spotify
 const dotenv = require('dotenv');
 dotenv.config();
@@ -44,7 +46,8 @@ router.get('/artist', (req,res) =>{
     // request all artist info that matches the query
     request(options, function (error, response) { 
         if (!error && response.statusCode === 200) {
-            res.send(JSON.parse(response.body));
+            // [ {name,id} ]
+            res.send(parseArtistIds(JSON.parse(response.body)));
         }
     });
 })
